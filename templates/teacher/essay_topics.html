@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-plus-circle me-2"></i> Yangi Mavzu</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Mavzu Nomi</label>
+                            <input type="text" name="title" class="form-control" placeholder="Masalan: Sun'iy intellekt asoslari" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Savol Fayli / Rasmi <span class="badge bg-secondary">Ixtiyoriy</span></label>
+                            <input type="file" name="topic_file" class="form-control" accept="image/*,application/pdf">
+                            <div class="form-text small">Agar savol rasmda bo'lsa, shu yerga yuklang. AI buni o'qiy oladi.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Qo'shimcha Tavsif</label>
+                            <textarea name="description" class="form-control" rows="4" placeholder="Talaba nimalarga e'tibor berishi kerak?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Topshirish Muddati</label>
+                            <input type="datetime-local" name="deadline" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Talaba qanday topshirsin?</label>
+                            <select name="submission_type" class="form-select">
+                                <option value="both" selected>Ixtiyoriy (Matn yoki Rasm)</option>
+                                <option value="file">Faqat Fayl/Rasm (Daftarga yozib)</option>
+                                <option value="text">Faqat Matn (Saytda yozish)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-save me-2"></i> Yaratish
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h4 class="mb-3 fw-bold text-dark">Yaratilgan Mavzular</h4>
+            <div class="list-group shadow-sm">
+                {% for topic in topics %}
+                <div class="list-group-item list-group-item-action p-3 border-0 border-bottom">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <h5 class="mb-1 text-primary fw-bold">{{ topic.title }}</h5>
+                        <small class="text-muted">{{ topic.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                    
+                    <p class="mb-2 text-muted small">{{ topic.description|truncatewords:20 }}</p>
+                    
+                    <div class="d-flex gap-3 text-small align-items-center mt-2">
+                        <span class="badge bg-light text-dark border">
+                            <i class="fa-regular fa-clock me-1"></i> {{ topic.deadline|date:"d.m.Y H:i" }}
+                        </span>
+                        
+                        {% if topic.topic_file %}
+                            <span class="badge bg-info text-dark">
+                                <i class="fa-solid fa-image me-1"></i> Rasm yuklangan
+                            </span>
+                        {% endif %}
+                        
+                        <span class="text-muted small">
+                            <i class="fa-solid fa-file-arrow-up me-1"></i> Turi: {{ topic.get_submission_type_display }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5 bg-white rounded">
+                    <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-50"></i>
+                    <p class="text-muted">Hozircha hech qanday mavzu yaratilmagan.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

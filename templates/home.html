@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Talaba Kabineti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .header-card { background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%); color: white; }
+        
+        .table thead th { background-color: #f8f9fa; color: #6c757d; border-bottom: 2px solid #e9ecef; }
+        .badge-score { font-size: 1rem; padding: 8px 12px; }
+        
+        /* Modal Profile */
+        .profile-img-lg { width: 120px; height: 120px; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="pb-5">
+
+<div class="container py-4">
+    
+    <div class="card header-card p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if student_info.image %}
+                    <img src="{{ student_info.image }}" class="rounded-circle border border-2 border-white" style="width: 70px; height: 70px; object-fit: cover;">
+                {% endif %}
+                <div>
+                    <h2 class="mb-0 fs-3 fw-bold">{{ student_info.name }}</h2>
+                    <p class="mb-0 opacity-75">Guruh: <b>{{ group }}</b> | ID: {{ student_info.id }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-light fw-bold text-primary" data-bs-toggle="modal" data-bs-target="#profileModal">
+                    👤 Profilim
+                </button>
+                <a href="{% url 'logout' %}" class="btn btn-danger fw-bold">Chiqish</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4 d-flex flex-row align-items-center gap-3">
+        <label class="fw-bold text-secondary">Semestr:</label>
+        <form method="get" class="flex-grow-1 m-0">
+            <select name="semester" class="form-select fw-bold border-primary" onchange="this.form.submit()">
+                {% for sem in all_semesters %}
+                    <option value="{{ sem.id }}" {% if sem.id == selected_sem_id %}selected{% endif %}>
+                        {{ sem.name }} {% if sem.current %} (Joriy) {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card p-3 text-center border-start border-5 border-danger">
+                <small class="text-uppercase text-muted fw-bold">Jami NB</small>
+                <h2 class="display-5 fw-bold text-danger mb-0">{{ attendance.total }}</h2>
+                <small class="text-muted">soat</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 text-center border-start border-5 border-success">
+                <small class="text-uppercase text-muted fw-bold">Sababli</small>
+                <h2 class="display-5 fw-bold text-success mb-0">{{ attendance.sababli }}</h2>
+                <small class="text-muted">soat</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 text-center border-start border-5 border-warning">
+                <small class="text-uppercase text-muted fw-bold">Sababsiz</small>
+                <h2 class="display-5 fw-bold text-warning mb-0">{{ attendance.sababsiz }}</h2>
+                <small class="text-muted">soat</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary">📅 Haftalik Jadval</h5>
+                </div>
+                <div class="card-body p-0 table-responsive" style="max-height: 500px;">
+                    {% if schedule %}
+                    <table class="table table-hover mb-0">
+                        <thead class="sticky-top">
+                            <tr>
+                                <th>Kun</th>
+                                <th>Fan / O'qituvchi</th>
+                                <th>Vaqt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in schedule %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ item.day }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ item.subject }}</div>
+                                    <small class="text-muted">{{ item.teacher }}</small>
+                                    <br>
+                                    <span class="badge bg-light text-dark border">{{ item.type }}</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-primary">{{ item.time }}</span>
+                                    <div class="small text-muted mt-1">{{ item.room }}</div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">Bu semestr uchun jadval yo'q.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-primary">📝 Topshiriqlar</h5>
+                </div>
+                <div class="card-body p-0 table-responsive" style="max-height: 500px;">
+                    {% if tasks %}
+                    <table class="table table-hover mb-0">
+                        <thead class="sticky-top">
+                            <tr>
+                                <th>Fan / Mavzu</th>
+                                <th>Muddat</th>
+                                <th class="text-center">Baho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in tasks %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">{{ t.subject }}</div>
+                                    <small class="text-muted">{{ t.name }}</small>
+                                </td>
+                                <td>
+                                    <small class="d-block">{{ t.deadline }}</small>
+                                    <span class="badge {% if t.status == 'Baholandi' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ t.status }}
+                                    </span>
+                                </td>
+                                <td class="text-center align-middle">
+                                    {% if t.grade != '-' %}
+                                        <span class="badge bg-primary badge-score">{{ t.grade }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">Topshiriqlar topilmadi.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed-bottom text-center mb-4" style="z-index: 100;">
+        <a href="{% url 'chat' %}" class="btn btn-primary rounded-pill px-4 py-3 shadow-lg fs-5 border-white border-2">
+            🤖 AI Yordamchi bilan suhbat
+        </a>
+    </div>
+
+</div>
+
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Talaba Pasporti</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        {% if student_info.image %}
+            <img src="{{ student_info.image }}" class="rounded-circle profile-img-lg mb-3">
+        {% endif %}
+        <h4 class="fw-bold">{{ student_info.name }}</h4>
+        <p class="text-muted mb-4">{{ student_info.specialty }}</p>
+        
+        <ul class="list-group list-group-flush text-start">
+            <li class="list-group-item d-flex justify-content-between">
+                <span class="text-muted">ID Raqam</span>
+                <span class="fw-bold">{{ student_info.id }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span class="text-muted">Tug'ilgan sana</span>
+                <span class="fw-bold">{{ student_info.birth_date }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span class="text-muted">Telefon</span>
+                <span class="fw-bold">{{ student_info.phone }}</span>
+            </li>
+            <li class="list-group-item">
+                <span class="text-muted d-block mb-1">Manzil</span>
+                <span class="fw-bold d-block">{{ student_info.address }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span class="text-muted">GPA (O'zlashtirish)</span>
+                <span class="badge bg-success fs-6">{{ student_info.gpa }}</span>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

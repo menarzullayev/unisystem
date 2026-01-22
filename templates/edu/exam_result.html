@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8 text-center">
+            <h2 class="fw-bold mb-2">Imtihon Natijasi</h2>
+            <p class="text-muted">{{ result.start_time|date:"d F Y, H:i" }} da topshirildi</p>
+            
+            <div class="d-inline-block bg-white shadow rounded-4 p-4 mt-3 border">
+                <div class="display-3 fw-bold text-primary">{{ result.overall_score }}</div>
+                <div class="text-uppercase small fw-bold text-muted letter-spacing-1">Overall Score</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for section_res in result.section_results.all %}
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        {% if section_res.section.section_type == 'reading' %} 📖 Reading
+                        {% elif section_res.section.section_type == 'writing' %} ✍️ Writing
+                        {% else %} {{ section_res.section.get_section_type_display }}
+                        {% endif %}
+                    </h5>
+                    <span class="badge bg-success fs-6">{{ section_res.score }} Ball</span>
+                </div>
+                <div class="card-body">
+                    
+                    {% if section_res.section.section_type == 'reading' %}
+                        <p class="mb-2"><strong>To'g'ri javoblar:</strong> {{ section_res.correct_count }} ta</p>
+                        
+                        <div class="accordion" id="acc_{{ section_res.id }}">
+                            <div class="accordion-item border-0">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-light rounded shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_{{ section_res.id }}">
+                                        Batafsil ko'rish
+                                    </button>
+                                </h2>
+                                <div id="collapse_{{ section_res.id }}" class="accordion-collapse collapse" data-bs-parent="#acc_{{ section_res.id }}">
+                                    <div class="accordion-body p-0 pt-3">
+                                        <ul class="list-group list-group-flush">
+                                            {% for q_id, ans in section_res.user_answers.items %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>Savol #{{ forloop.counter }}: <b>{{ ans }}</b></span>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% elif section_res.section.section_type == 'writing' %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-muted">Sizning inshongiz:</h6>
+                            <div class="p-3 bg-light rounded fst-italic text-muted small" style="max-height: 150px; overflow-y: auto;">
+                                {{ section_res.written_essay|linebreaks }}
+                            </div>
+                        </div>
+                        
+                        {% if section_res.ai_feedback %}
+                        <div class="alert alert-info border-0 shadow-sm">
+                            <h6 class="alert-heading fw-bold"><i class="fa-solid fa-robot me-2"></i>AI Izohi:</h6>
+                            <hr>
+                            <p class="mb-0 small">{{ section_res.ai_feedback|linebreaks }}</p>
+                        </div>
+                        {% endif %}
+                        
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{% url 'exam_list' %}" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i> Ortga qaytish
+        </a>
+    </div>
+</div>
+{% endblock %}

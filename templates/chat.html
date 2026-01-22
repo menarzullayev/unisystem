@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    /* Chat oynasini kattalashtirish */
+    .chat-container { 
+        height: 85vh; /* Ekranning 85% qismini egallaydi */
+        display: flex; 
+        flex-direction: column; 
+        background: #fff; 
+        border-radius: 15px; 
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1); 
+        overflow: hidden; 
+    }
+    
+    .chat-header { background: #0d6efd; color: white; padding: 15px 25px; display: flex; align-items: center; gap: 15px; }
+    .chat-box { flex: 1; padding: 25px; overflow-y: auto; background: #f0f2f5; display: flex; flex-direction: column; gap: 20px; }
+    
+    /* Xabarlar dizayni */
+    .message { max-width: 85%; padding: 15px 20px; border-radius: 18px; font-size: 1rem; line-height: 1.6; position: relative; animation: fadeIn 0.3s ease; word-wrap: break-word; }
+    .message.user { align-self: flex-end; background: #0d6efd; color: white; border-bottom-right-radius: 4px; }
+    .message.ai { align-self: flex-start; background: white; color: #212529; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    
+    /* Jadvallar dizayni (AI jadval qaytarganda ishlaydi) */
+    .message table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.9rem; }
+    .message th, .message td { border: 1px solid #dee2e6; padding: 8px 12px; text-align: left; }
+    .message th { background-color: #f8f9fa; color: #495057; font-weight: bold; }
+    .message.user table, .message.user th, .message.user td { border-color: rgba(255,255,255,0.3); color: white; }
+    .message.user th { background-color: rgba(255,255,255,0.1); }
+
+    /* Input qismi */
+    .chat-input-area { padding: 20px; background: white; border-top: 1px solid #eee; display: flex; gap: 15px; }
+    
+    .typing-indicator { align-self: flex-start; background: white; padding: 10px 15px; border-radius: 15px; display: none; width: fit-content; margin-bottom: 10px;}
+    .dot { height: 8px; width: 8px; background: #6c757d; border-radius: 50%; display: inline-block; animation: bounce 1.3s linear infinite; margin: 0 2px; }
+    .dot:nth-child(2) { animation-delay: -1.1s; }
+    .dot:nth-child(3) { animation-delay: -0.9s; }
+    
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+<div class="container-fluid py-3 px-4"> <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9"> <div class="chat-container">
+                
+                <div class="chat-header">
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 45px; height: 45px;">
+                        <i class="fa-solid fa-robot fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Hemis AI Assistant</h5>
+                        <small class="opacity-75"><i class="fa-solid fa-circle fa-2xs text-success me-1"></i>Onlayn</small>
+                    </div>
+                </div>
+
+                <div class="chat-box" id="chatBox">
+                    <div class="message ai">
+                        Assalomu alaykum, <b>{{ user.first_name }}</b>! 👋<br>
+                        Men sizning shaxsiy yordamchingizman. Dars jadvali, baholar yoki davomat haqida so'rashingiz mumkin.
+                    </div>
+                    
+                    <div class="typing-indicator" id="typing">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="userInput" class="form-control border-0 bg-light py-3 px-4 rounded-pill shadow-sm" placeholder="Savolingizni yozing..." autocomplete="off" style="font-size: 1.1rem;">
+                    <button onclick="sendMessage()" class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                        <i class="fa-solid fa-paper-plane fa-lg"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const typing = document.getElementById('typing');
+
+    userInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") sendMessage();
+    });
+
+    function appendMessage(text, sender) {
+        const div = document.createElement('div');
+        div.classList.add('message', sender);
+        
+        if (sender === 'ai') {
+            // AI javobini Markdown dan HTML ga o'tkazish
+            div.innerHTML = marked.parse(text);
+        } else {
+            div.textContent = text;
+        }
+        
+        chatBox.insertBefore(div, typing);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        userInput.value = '';
+        
+        typing.style.display = 'block';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch('/ai-chat/api/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ message: text })
+            });
+            
+            const data = await response.json();
+            typing.style.display = 'none';
+            
+            if (data.status === 'success') {
+                appendMessage(data.reply, 'ai');
+            } else {
+                appendMessage("Xatolik: " + data.message, 'ai');
+            }
+        } catch (error) {
+            typing.style.display = 'none';
+            appendMessage("Internet bilan aloqa yo'q.", 'ai');
+        }
+    }
+</script>
+{% endblock %}

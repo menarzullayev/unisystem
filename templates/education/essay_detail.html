@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="fw-bold text-primary mb-2">{{ topic.title }}</h4>
+                            <p class="text-muted mb-3">{{ topic.description|default:"Tavsif yo'q" }}</p>
+                        </div>
+                        {% if topic.submission_type == 'text' %}
+                            <span class="badge bg-secondary">Faqat Matn</span>
+                        {% elif topic.submission_type == 'file' %}
+                            <span class="badge bg-secondary">Faqat Fayl</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Matn yoki Fayl</span>
+                        {% endif %}
+                    </div>
+
+                    {% if topic.topic_file %}
+                    <div class="alert alert-info d-flex align-items-center mt-3" role="alert">
+                        <i class="fa-solid fa-file-arrow-down fa-2x me-3 text-info"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Topshiriq Fayli</h6>
+                            <p class="mb-1 small text-muted">O'qituvchi ushbu mavzu bo'yicha qo'shimcha fayl/rasm yuklagan.</p>
+                            <a href="{{ topic.topic_file.url }}" target="_blank" class="btn btn-sm btn-primary rounded-pill">
+                                <i class="fa-solid fa-download me-1"></i> Yuklab Olish / Ko'rish
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="d-flex gap-4 text-small text-muted">
+                        <span><i class="fa-solid fa-calendar text-warning"></i> Dedlayn: <b>{{ topic.deadline|date:"d.m.Y H:i" }}</b></span>
+                        </div>
+                </div>
+            </div>
+
+            {% if not submission %}
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h5 class="mb-0 text-dark"><i class="fa-solid fa-paper-plane me-2 text-primary"></i> Yozma ishni yuborish</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            {% if topic.submission_type != 'file' %}
+                            <div class="mb-4">
+                                <label class="form-label text-muted fw-bold">Javobingizni yozing:</label>
+                                <textarea name="content" class="form-control" rows="8" placeholder="Matnni shu yerga kiriting..."></textarea>
+                            </div>
+                            {% endif %}
+
+                            {% if topic.submission_type != 'text' %}
+                            <div class="mb-4">
+                                <label class="form-label text-muted fw-bold">Yoki fayl yuklang (Rasm/PDF):</label>
+                                <input type="file" name="file" class="form-control" accept="image/*,.pdf,.doc,.docx">
+                                <div class="form-text">Daftarga yozib, rasmga olib yuklashingiz mumkin.</div>
+                            </div>
+                            {% endif %}
+
+                            <div class="d-grid">
+                                <button type="submit" name="submit_essay" class="btn btn-primary btn-lg">
+                                    <i class="fa-solid fa-rocket me-2"></i> Yuborish va AI Tekshiruv
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            {% else %}
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Mening Javobim</h5>
+                        
+                        {% if submission.status == 'ai_graded' %}
+                            <span class="badge bg-info text-dark">🤖 AI Baholadi</span>
+                        {% elif submission.status == 'appeal' %}
+                            <span class="badge bg-warning text-dark">👨‍🏫 O'qituvchi Tekshirmoqda</span>
+                        {% elif submission.status == 'done' %}
+                            <span class="badge bg-success">✅ Yakunlandi</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Kutilmoqda</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            {% if submission.content %}
+                                <div class="bg-light p-3 rounded border mb-2" style="white-space: pre-wrap;">{{ submission.content }}</div>
+                            {% endif %}
+                            
+                            {% if submission.file %}
+                                <div class="mt-2">
+                                    <p class="fw-bold mb-1"><i class="fa-solid fa-paperclip"></i> Yuklangan fayl:</p>
+                                    <a href="{{ submission.file.url }}" target="_blank" class="text-decoration-none">
+                                        {{ submission.file.name }}
+                                    </a>
+                                    <div class="mt-2">
+                                        <img src="{{ submission.file.url }}" class="img-fluid rounded border" style="max-height: 300px;">
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100 position-relative bg-light">
+                                    <h6 class="text-muted text-uppercase small fw-bold">AI Xulosasi</h6>
+                                    <div class="display-4 fw-bold {% if submission.ai_grade >= 80 %}text-success{% elif submission.ai_grade >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ submission.ai_grade|default:"0" }}<span class="fs-4 text-muted">/100</span>
+                                    </div>
+                                    <p class="mt-2 small">{{ submission.ai_feedback|default:"Hozircha izoh yo'q" }}</p>
+                                    <i class="fa-solid fa-robot position-absolute top-0 end-0 m-3 text-muted opacity-25 fa-2x"></i>
+                                </div>
+                            </div>
+
+                            {% if submission.teacher_grade %}
+                            <div class="col-md-6">
+                                <div class="border border-success bg-success-subtle rounded p-3 h-100 position-relative">
+                                    <h6 class="text-success text-uppercase small fw-bold">O'qituvchi Xulosasi</h6>
+                                    <div class="display-4 fw-bold text-success">
+                                        {{ submission.teacher_grade }}<span class="fs-4 text-muted">/100</span>
+                                    </div>
+                                    <p class="mt-2 small">{{ submission.teacher_feedback }}</p>
+                                    <i class="fa-solid fa-chalkboard-user position-absolute top-0 end-0 m-3 text-success opacity-25 fa-2x"></i>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if submission.status == 'ai_graded' %}
+                        <div class="alert alert-light border mt-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <strong>Bahodan norozimisiz?</strong><br>
+                                    <small class="text-muted">Ishni jonli o'qituvchi tekshirishi uchun yuborishingiz mumkin.</small>
+                                </div>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" name="appeal" class="btn btn-outline-danger btn-sm">
+                                        <i class="fa-solid fa-gavel me-2"></i> Appellatsiya Berish
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

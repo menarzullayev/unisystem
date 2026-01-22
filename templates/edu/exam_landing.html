@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6 text-center text-lg-start mb-5 mb-lg-0">
+            <h1 class="display-4 fw-bold text-dark mb-3">Mock Academic Exam</h1>
+            <p class="lead text-muted mb-4">
+                Haqiqiy imtihon muhitini his qiling. Bizning sun'iy intellekt tizimimiz 
+                sizga tasodifiy tushgan variantni taqdim etadi va baholaydi (Reading & Writing).
+            </p>
+            
+            <div class="card shadow-lg border-0 rounded-4 bg-primary text-white overflow-hidden" style="max-width: 500px;">
+                <div class="card-body p-5 text-center position-relative">
+                    <i class="fa-solid fa-file-circle-check position-absolute opacity-25" style="font-size: 150px; top: -20px; right: -20px;"></i>
+                    
+                    <h3 class="fw-bold mb-4 position-relative">Tayyormisiz?</h3>
+                    
+                    <a href="{% url 'start_random_exam' %}" class="btn btn-light btn-lg w-100 fw-bold py-3 rounded-pill shadow-sm position-relative">
+                        <i class="fa-solid fa-play me-2 text-primary"></i> TESTNI BOSHLASH
+                    </a>
+                    
+                    <p class="small mt-3 mb-0 opacity-75 position-relative">
+                        <i class="fa-solid fa-clock me-1"></i> Davomiyligi: ~1 soat 30 daqiqa
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-history me-2 text-primary"></i> Mening Natijalarim</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for res in history %}
+                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center hover-bg">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ res.title }}</h6>
+                                <small class="text-muted">
+                                    <i class="fa-regular fa-calendar me-1"></i> {{ res.start_time|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary fs-6 mb-1">{{ res.overall_score }}</span>
+                                <br>
+                                <a href="{% url 'exam_result' res.id %}" class="text-decoration-none small">Ko'rish &rarr;</a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-clipboard-list fa-3x mb-3 opacity-25"></i>
+                            <p>Siz hali imtihon topshirmagansiz.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-bg:hover { background-color: #f8f9fa; }
+</style>
+{% endblock %}

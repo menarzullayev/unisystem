@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">✍️ Yozma Ishlar</h3>
+    </div>
+
+    <div class="row g-4">
+        {% for topic in topics %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary">Mavzu #{{ topic.id }}</span>
+                        {% if topic.id in submitted_ids %}
+                            <span class="badge bg-success"><i class="fa-solid fa-check"></i> Topshirilgan</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Topshirilmagan</span>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title fw-bold mt-2">{{ topic.title }}</h5>
+                    <p class="card-text text-muted small">{{ topic.description|truncatechars:80 }}</p>
+                    
+                    <div class="d-flex align-items-center text-muted small mb-3">
+                        <i class="fa-regular fa-clock me-2"></i> Muddat: {{ topic.deadline|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pt-0 pb-3">
+                    <a href="{% url 'essay_detail' topic.id %}" class="btn btn-outline-primary w-100 rounded-pill">
+                        {% if topic.id in submitted_ids %}
+                            Natijani Ko'rish
+                        {% else %}
+                            Boshlash
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="100" alt="Empty">
+            <p class="text-muted mt-3">Hozircha yozma ish mavzulari mavjud emas.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

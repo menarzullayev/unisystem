@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">{{ submission.user.full_name }} — {{ submission.topic.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small">Talaba javobi:</h6>
+                    <div class="bg-light p-3 rounded mb-4 border">{{ submission.content }}</div>
+
+                    <div class="alert alert-info d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-robot fa-2x mt-1"></i>
+                        <div>
+                            <strong>AI Bahosi: {{ submission.ai_grade }} ball</strong>
+                            <p class="mb-0 small">{{ submission.ai_feedback }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow border-0 sticky-top" style="top: 20px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-check-double"></i> Yakuniy Baholash</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Yangi Baho (0-100)</label>
+                            <input type="number" name="grade" class="form-control form-control-lg fw-bold text-center" value="{{ submission.ai_grade }}" min="0" max="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">O'qituvchi Izohi</label>
+                            <textarea name="feedback" class="form-control" rows="5" required placeholder="Nima uchun baho o'zgardi?"></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Bahoni Tasdiqlash</button>
+                            <a href="{% url 'teacher_dashboard' %}" class="btn btn-outline-secondary">Bekor qilish</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

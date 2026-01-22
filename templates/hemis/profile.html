@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-primary text-white text-center p-5 position-relative">
+                    {% if student_info.image %}
+                        <img src="{{ student_info.image }}" alt="Student" class="rounded-circle border border-4 border-white shadow mb-3" style="width: 140px; height: 140px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-white text-primary d-inline-flex align-items-center justify-content-center border border-4 border-white shadow mb-3" style="width: 140px; height: 140px; font-size: 3rem;">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h2 class="fw-bold mb-1">{{ student_info.full_name }}</h2>
+                    <p class="opacity-75 mb-0 fs-5">{{ student_info.hemis_id }}</p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    
+                    <h5 class="text-primary border-bottom pb-2 mb-4 fw-bold">
+                        <i class="fa-solid fa-graduation-cap me-2"></i> O'qish Ma'lumotlari
+                    </h5>
+                    
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Fakultet</small>
+                            <div class="fs-6 text-dark">{{ student_info.faculty }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Mutaxassislik</small>
+                            <div class="fs-6 text-dark">{{ student_info.specialty }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Kurs</small>
+                            <div class="fs-6 text-dark">{{ student_info.level }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Guruh</small>
+                            <div class="fs-6 text-dark">{{ student_info.group_name }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">O'zlashtirish (GPA)</small>
+                            <div><span class="badge bg-success fs-6">{{ student_info.gpa }}</span></div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-primary border-bottom pb-2 mb-4 fw-bold">
+                        <i class="fa-solid fa-address-card me-2"></i> Shaxsiy Ma'lumotlar
+                    </h5>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Tug'ilgan Sana</small>
+                            <div class="fs-6 text-dark">{{ student_info.birth_date }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">Telefon Raqam</small>
+                            <div class="fs-6 text-dark">{{ student_info.phone }}</div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted text-uppercase fw-bold">Yashash Manzili</small>
+                            <div class="fs-6 text-dark bg-light p-3 rounded border">
+                                <i class="fa-solid fa-location-dot text-danger me-2"></i>
+                                {{ student_info.address }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

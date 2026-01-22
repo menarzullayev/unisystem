@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">👨‍🏫 O'qituvchi Paneli</h3>
+        <a href="{% url 'teacher_topics' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus me-2"></i> Mavzu Yaratish
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark border-0 shadow-sm">
+                <div class="card-body">
+                    <h3>{{ stats.pending_count }}</h3>
+                    <p class="mb-0">Tekshirish kutilmoqda</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white border-0 shadow-sm">
+                <div class="card-body">
+                    <h3>{{ stats.total_graded }}</h3>
+                    <p class="mb-0">Siz baholaganlar</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white border-0 shadow-sm">
+                <div class="card-body">
+                    <h3>{{ stats.total_ai_graded }}</h3>
+                    <p class="mb-0">AI avtomatik baholagan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="mb-3 text-danger">⚠️ Ko'rib chiqish talab etiladi (Appellatsiyalar)</h5>
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Talaba</th>
+                        <th>Mavzu</th>
+                        <th>Sana</th>
+                        <th>Status</th>
+                        <th>AI Bahosi</th>
+                        <th>Amal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in reviews %}
+                    <tr>
+                        <td class="ps-4 fw-bold">{{ sub.user.full_name }}</td>
+                        <td>{{ sub.topic.title }}</td>
+                        <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if sub.status == 'appeal' %}
+                                <span class="badge bg-danger">Appellatsiya</span>
+                            {% else %}
+                                <span class="badge bg-warning">Qayta ko'rish</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sub.ai_grade }} ball</td>
+                        <td>
+                            <a href="{% url 'teacher_grade' sub.id %}" class="btn btn-sm btn-outline-primary">
+                                Tekshirish
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            Hozircha tekshiriladigan ishlar yo'q. Hammasi joyida! 🎉
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
